@@ -1,0 +1,10 @@
+{
+    "compilerOptions": {
+        "target": "es2017",
+        "module": "es2015",
+        "sourceMap": true,
+        "outDir": "./dist",
+        "moduleResolution": "node",
+        "removeComments": true
+    }
+}

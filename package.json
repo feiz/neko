@@ -2,13 +2,23 @@
   "name": "neko",
   "version": "1.0.0",
   "description": "インターネット",
-  "main": "index.js",
+  "main": "dist/main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack",
+    "watch": "webpack -w",
+    "dev": "nodemon"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@slack/bolt": "^1.4.1"
+  },
+  "devDependencies": {
+    "ts-loader": "^6.2.1",
+    "typescript": "^3.7.2",
+    "webpack": "^4.41.2",
+    "webpack-cli": "^3.3.10",
+    "webpack-dev-middleware": "^3.7.2"
   }
 }
