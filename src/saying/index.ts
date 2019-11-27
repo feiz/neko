@@ -80,7 +80,7 @@ function choice(items: QueryOutput["Items"]): any {
   return items[index].word.S;
 }
 app.message(/^!(.*)/, async ({ context, say }) => {
-  const args = context.matches[1].trim().split(" ");
+  const source = context.matches[1].trim();
   const keyword = args[0];
   const word = args[1];
   dynamoDB.putItem({

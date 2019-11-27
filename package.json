@@ -4,7 +4,7 @@
   "description": "インターネット",
   "main": "dist/main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "dev": "nodemon"
   },
   "author": "",
@@ -14,6 +14,9 @@
     "@slack/bolt": "^1.4.1"
   },
   "devDependencies": {
+    "@types/jest": "^24.0.23",
+    "jest": "^24.9.0",
+    "ts-jest": "^24.2.0",
     "ts-loader": "^6.2.1",
     "ts-node": "^8.5.2",
     "typescript": "^3.7.2",
