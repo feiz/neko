@@ -43,11 +43,11 @@ const subCommands: { [key: string]: botCommand } = {
     dynamoDB.putItem({ TableName: "Saying", Item: { keyword: { S: word } } });
     return `語録「${word}」を登録しました`;
   },
-  delete: async args => {
+  "(delete|del)": async args => {
     const word = args[0];
     return `語録「${word}」を削除しました`;
   },
-  list: async args => {
+  "(list|ls)": async args => {
     const keyword = args[0];
     const wds = await dynamoDB.query({
       TableName: "Words",
@@ -75,34 +75,76 @@ for (let subcommand in subCommands) {
   });
 }
 
+app.message(/^?+(?<keyword>.*) (?<word>.*)/, async ({ context, say }) => {
+  const keyword = context.matches[1];
+  const word = context.matches[2];
+  try {
+    await dynamoDB.getItem({
+      TableName: "Saying",
+      Key: { keyword: { S: keyword } }
+    });
+    await dynamoDB.putItem({
+      TableName: "Words",
+      Item: { keyword: { S: keyword }, word: { S: word } }
+    });
+  } catch (e) {
+    say(`${e}`);
+  }
+});
+app.message(/^?-(?<keyword>.*) (?<word>.*)/, async ({ context, say }) => {
+  const keyword = context.matches[1];
+  const word = context.matches[2];
+  try {
+    await dynamoDB.getItem({
+      TableName: "Saying",
+      Key: { keyword: { S: keyword } }
+    });
+    await dynamoDB.deleteItem({
+      TableName: "Words",
+      Key: { keyword: { S: keyword }, word: { S: word } }
+    });
+  } catch (e) {
+    say(`${e}`);
+  }
+});
+app.message(/^?^(?<keyword>.*)/, async ({ context, say }) => {
+  const keyword = context.matches[1];
+  try {
+    await dynamoDB.getItem({
+      TableName: "Saying",
+      Key: { keyword: { S: keyword } }
+    });
+    await dynamoDB.putItem({
+      TableName: "Words",
+      Item: { keyword: { S: keyword } }
+    });
+  } catch (e) {
+    say(`${e}`);
+  }
+});
+
 function choice(items: QueryOutput["Items"]): any {
   const index = Math.floor(Math.random() * items.length);
   return items[index].word.S;
 }
 app.message(/^!(.*)/, async ({ context, say }) => {
   const source = context.matches[1].trim();
-  const keyword = args[0];
-  const word = args[1];
-  dynamoDB.putItem({
-    TableName: "Words",
-    Item: { keyword: { S: keyword }, word: { S: word } }
-  });
 
   try {
-    await dynamoDB.getItem({
-      TableName: "Saying",
-      Key: { keyword: { S: keyword } }
-    });
-
-    const wds = await dynamoDB.query({
-      TableName: "Words",
-      ExpressionAttributeValues: {
-        ":keyword": { S: keyword }
-      },
-      KeyConditionExpression: "keyword = :keyword"
-    });
-    const wd = choice(wds.Items);
-    say(`${wd}`);
+    //    await dynamoDB.getItem({
+    //      TableName: "Saying",
+    //      Key: { keyword: { S: keyword } }
+    //    });
+    //
+    //    const wds = await dynamoDB.query({
+    //      TableName: "Words",
+    //      ExpressionAttributeValues: {
+    //        ":keyword": { S: keyword }
+    //      },
+    //      KeyConditionExpression: "keyword = :keyword"
+    //    });
+    //    const wd = choice(wds.Items);
+    say(`:thinking_face`);
   } catch (e) {
     say(`${e}`);
   }
