@@ -1,16 +1,36 @@
-class Lexer {
-  source: string;
-  current: number;
+enum TokenType {
+  IDENT,
+  NUMBER,
+  STRING,
+  LBRACE,
+  RBRACE,
+  LPARENTHESIS,
+  RPARENTHESIS,
+  COMMA,
+  SPACE,
+  ILLEGAL,
+  EOF
+}
 
-  constructor(source: string) {
-    this.source = source;
+interface Token {
+  type: TokenType;
+  literal: string;
+}
+
+const NOT_IDENT = /[ \.\{\}\(\)\[\]]/;
+class Lexer {
+  current: number;
+  tokenizer: Generator<Token>;
+
+  constructor(private source: string) {
     this.current = 0;
+    this.tokenizer = this.tokenize();
   }
 
   /**
    * 現在の文字
    */
-  ch(): string {
+  get ch(): string {
     if (this.current >= this.source.length) {
       return null;
     }
@@ -46,99 +66,77 @@ class Lexer {
     terminateAtEOF: Boolean,
     includeTerminal: Boolean
   ): string {
-    let content = this.ch();
+    let content = this.ch;
     this.next();
-    while (!ptn.test(this.ch())) {
-      if (this.ch() == null) {
+    while (!ptn.test(this.ch)) {
+      if (this.ch == null) {
         if (terminateAtEOF) {
           return content;
         } else {
           throw Error("EOF");
         }
       }
-      content += this.ch();
+      content += this.ch;
       this.next();
     }
     if (includeTerminal) {
-      content += this.ch();
+      content += this.ch;
       this.next();
     }
 
     return content;
   }
-}
 
-enum TokenType {
-  Ident,
-  Number,
-  String,
-  LBrace,
-  RBrace,
-  LParenthesis,
-  RParenthesis,
-  Comma,
-  Space,
-  Illegal,
-  EOF
-}
-
-interface Token {
-  type: TokenType;
-  literal: string;
-}
-
-const NOT_IDENT = /[ \.\{\}\(\)\[\]]/;
-
-function tokenize(source: string): Token[] {
-  const lexer = new Lexer(source);
-  let tokens: Token[] = [];
-  while (lexer.ch() != null) {
-    let token = null;
-    switch (lexer.ch()) {
-      case "{":
-        token = { type: TokenType.LBrace, literal: "{" };
-        lexer.next();
-        break;
-      case "}":
-        token = { type: TokenType.RBrace, literal: "}" };
-        lexer.next();
-        break;
-      case "(":
-        token = { type: TokenType.LParenthesis, literal: "(" };
-        lexer.next();
-        break;
-      case ")":
-        token = { type: TokenType.RParenthesis, literal: ")" };
-        lexer.next();
-        break;
-      case " ":
-        lexer.fetchTo(/[^ ]/, true, false); // 連続するスペースの読み飛ばし
-        token = { type: TokenType.Space, literal: " " };
-        break;
-      case ",":
-        token = { type: TokenType.Comma, literal: "," };
-        lexer.next();
-        break;
-      case '"':
-        token = {
-          type: TokenType.String,
-          literal: lexer.fetchTo(/"/, false, true)
-        };
-        break;
-      default:
-        if (NOT_IDENT.test(lexer.ch())) {
-          throw Error(`Illegal Character: ${lexer.ch()}`);
-        }
-        token = {
-          type: TokenType.Ident,
-          literal: lexer.fetchTo(/[ \{\}\(\),\.,]/, true, false)
-        };
-        break;
+  *tokenize(): Generator<Token> {
+    while (this.ch != null) {
+      let token = null;
+      switch (this.ch) {
+        case "{":
+          yield { type: TokenType.LBRACE, literal: "{" };
+          this.next();
+          break;
+        case "}":
+          yield { type: TokenType.RBRACE, literal: "}" };
+          this.next();
+          break;
+        case "(":
+          yield { type: TokenType.LPARENTHESIS, literal: "(" };
+          this.next();
+          break;
+        case ")":
+          yield { type: TokenType.RPARENTHESIS, literal: ")" };
+          this.next();
+          break;
+        case " ":
+          this.fetchTo(/[^ ]/, true, false); // 連続するスペースの読み飛ばし
+          //yield { type: TokenType.Space, literal: " " };
+          break;
+        case ",":
+          yield { type: TokenType.COMMA, literal: "," };
+          this.next();
+          break;
+        case '"':
+          yield {
+            type: TokenType.STRING,
+            literal: this.fetchTo(/"/, false, true)
+          };
+          break;
+        default:
+          if (NOT_IDENT.test(this.ch)) {
+            throw Error(`Illegal Character: ${this.ch}`);
+          }
+          yield {
+            type: TokenType.IDENT,
+            literal: this.fetchTo(/[ \{\}\(\),\.,"]/, true, false)
+          };
+          break;
+      }
     }
-    tokens.push(token);
+    yield { type: TokenType.EOF, literal: null };
   }
-  tokens.push({ type: TokenType.EOF, literal: null });
-  return tokens;
+  nextToken(): Token {
+    return this.tokenizer.next().value;
+  }
 }
 
-export { tokenize, TokenType, Token };
+export { Lexer, TokenType, Token };
