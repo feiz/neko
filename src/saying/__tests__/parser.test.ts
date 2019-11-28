@@ -3,7 +3,7 @@ import { Lexer } from "../lexer";
 import { SayingNode, StringLiteral } from "../ast";
 
 test("basic parse", () => {
-  const parser = new Parser(new Lexer(`５" "{７}" やばい"3`));
+  const parser = new Parser(new Lexer(`５" "{７}" やばい"2`));
   const root = parser.parse();
   expect(root.nodes[0]).toBeInstanceOf(SayingNode);
   expect(root.nodes[0].literal).toBe("５");
@@ -18,5 +18,5 @@ test("basic parse", () => {
   expect(root.nodes[3].literal).toBe(" やばい");
 
   expect(root.nodes[4]).toBeInstanceOf(SayingNode);
-  expect(root.nodes[4].literal).toBe("3");
+  expect(root.nodes[4].literal).toBe("2");
 });
