@@ -8,6 +8,11 @@ class Node {
   get source() {
     return this.literal;
   }
+
+  eval(depth: number): string {
+    return ""
+  }
+
 }
 
 class Expression extends Node {
@@ -20,12 +25,17 @@ class Root extends Node {
   nodes: Node[] = [];
 }
 
+/** 文字列リテラル */
 class StringLiteral extends Expression {
   join(token: Token) {
     this.literal += token.literal.slice(1, -1);
   }
   get source() {
     return `"${this.literal}"`;
+  }
+
+  eval(depth: number) {
+    return this.literal;
   }
 }
 
