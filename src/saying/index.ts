@@ -3,6 +3,7 @@ import {
   QueryOutput
 } from "@aws-sdk/client-dynamodb-v2-node";
 import { Saying } from "./models"
+import { evaluate } from "./evaluator"
 
 const command: string = "saying";
 interface botCommand {
@@ -61,28 +62,13 @@ app.message(/^\?^(?<keyword>.*)/, async ({ context, say }) => {
 
 });
 
-function choice(items: QueryOutput["Items"]): any {
-  const index = Math.floor(Math.random() * items.length);
-  return items[index].word.S;
-}
+
 app.message(/^!(.*)/, async ({ context, say }) => {
   const source = context.matches[1].trim();
 
   try {
-    //    await dynamoDB.getItem({
-    //      TableName: "Saying",
-    //      Key: { keyword: { S: keyword } }
-    //    });
-    //
-    //    const wds = await dynamoDB.query({
-    //      TableName: "Words",
-    //      ExpressionAttributeValues: {
-    //        ":keyword": { S: keyword }
-    //      },
-    //      KeyConditionExpression: "keyword = :keyword"
-    //    });
-    //    const wd = choice(wds.Items);
-    say(`:thinking_face`);
+    const result = await evaluate(source, 0);
+    say(result);
   } catch (e) {
     say(`${e}`);
   }

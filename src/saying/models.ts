@@ -21,7 +21,7 @@ import { dynamoDB } from "../lib/db"
             ]
         });
     } catch (e) {
-        console.log(e);
+        //console.log(e);
     }
 })();
 
@@ -58,16 +58,26 @@ class Saying {
         }
     }
 
-    static async add(keyword: string, word: string) {
+    static async exists(keyword: string) {
         try {
-            await dynamoDB.getItem({
+            const result = await dynamoDB.getItem({
                 TableName: "Saying",
                 Key: { keyword: { S: keyword } }
-            });
-            await dynamoDB.putItem({
-                TableName: "Words",
-                Item: { keyword: { S: keyword }, word: { S: word } }
-            });
+            })
+            return typeof result.Item !== "undefined";
+        } catch (e) {
+            console.log(e);
+        }
+    }
+
+    static async add(keyword: string, word: string) {
+        try {
+            if (await Saying.exists(keyword)) {
+                await dynamoDB.putItem({
+                    TableName: "Words",
+                    Item: { keyword: { S: keyword }, word: { S: word } }
+                });
+            }
         } catch (e) {
             console.log(e);
         }
@@ -75,14 +85,12 @@ class Saying {
 
     static async remove(keyword: string, word: string) {
         try {
-            await dynamoDB.getItem({
-                TableName: "Saying",
-                Key: { keyword: { S: keyword } }
-            });
-            await dynamoDB.deleteItem({
-                TableName: "Words",
-                Key: { keyword: { S: keyword }, word: { S: word } }
-            });
+            if (await Saying.exists(keyword)) {
+                await dynamoDB.deleteItem({
+                    TableName: "Words",
+                    Key: { keyword: { S: keyword }, word: { S: word } }
+                });
+            }
         } catch (e) {
             console.log(e);
         }
@@ -90,14 +98,12 @@ class Saying {
 
     static async pop(keyword: string, owner: string) {
         try {
-            await dynamoDB.getItem({
-                TableName: "Saying",
-                Key: { keyword: { S: keyword } }
-            });
-            await dynamoDB.putItem({
-                TableName: "Words",
-                Item: { keyword: { S: keyword } }
-            });
+            if (await Saying.exists(keyword)) {
+                await dynamoDB.putItem({
+                    TableName: "Words",
+                    Item: { keyword: { S: keyword } }
+                });
+            }
         } catch (e) {
             console.log(`${e}`);
         }
