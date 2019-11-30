@@ -5,4 +5,6 @@ const app = new App({
     signingSecret: process.env.SLACK_SIGNING_SECRET
 });
 
+app.message("aho", ({ context, say }) => { say("はい") });
+
 export { app };
