@@ -73,7 +73,7 @@ class SayingNode extends Expression {
       return (this.literal);
     } else {
       const choosen = this.choice((await Saying.list(this.literal)).Items);
-      return evaluate(choosen, depth);
+      return evaluate(choosen, depth + 1);
     }
   }
 }
