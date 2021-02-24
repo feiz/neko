@@ -1,10 +1,20 @@
-import { App } from "@slack/bolt";
+import { App, AppOptions, ExpressReceiver } from '@slack/bolt'
+import { serverlessExpress } from '@vendia/serverless-express'
 
-const app = new App({
-    token: process.env.SLACK_BOT_TOKEN,
-    signingSecret: process.env.SLACK_SIGNING_SECRET
-});
+const expressReceiver = new ExpressReceiver({
+  signingSecret: process.env.SLACK_SIGNING_SECRET,
+  processBeforeResponse: true
+})
+const options:AppOptions = {
+  token: process.env.SLACK_BOT_TOKEN
+}
 
-app.message("aho", ({ context, say }) => { say("はい") });
+if (process.env.DEVELOP) {
+  options.signingSecret = process.env.SLACK_SIGNING_SECRET
+} else {
+  options.receiver = expressReceiver
+}
+const app = new App(options)
 
-export { app };
+export const handler = serverlessExpress({ app: expressReceiver.app })
+export { app }
