@@ -1,4 +1,6 @@
 .vscode
 .envrc
 node_modules/
-dist/
+.build/
+.serverless
+.webpack
