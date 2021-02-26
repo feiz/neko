@@ -1,9 +1,9 @@
 import { dynamoDB } from "../lib/db"
 
 class Saying {
-    static async create(keyword: string) {
+    static async create(keyword: string, description: string) {
         try {
-            await dynamoDB.putItem({ TableName: "Saying", Item: { keyword: { S: keyword } } });
+            await dynamoDB.putItem({ TableName: "Saying", Item: { keyword: { S: keyword }, description: { S: description } }} );
         } catch (e) {
             console.log(e);
         }
@@ -32,6 +32,17 @@ class Saying {
             console.log(e);
         }
     }
+
+    static async keywords() {
+        try {
+            return dynamoDB.query({
+                TableName: "Saying"
+            })
+        } catch (e) {
+            console.log(e);
+        }
+    }
+
 
     static async exists(keyword: string) {
         try {

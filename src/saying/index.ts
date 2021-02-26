@@ -47,11 +47,33 @@ interface botCommand {
 const subCommands: { [key: string]: botCommand } = {
   create: async args => {
     const keyword = args[0]
-    await Saying.create(keyword)
+    const description = args.length == 2 ? args[1] : ""
+
+    if (/^\w$/.test(keyword)) {
+      return "半角1文字の語録は登録できません"
+    }
+    if (await Saying.exists(keyword)) {
+      return `語録「${keyword}」はすでに登録済みです`
+    }
+    await Saying.create(keyword, description)
     return `語録「${keyword}」を登録しました`
+  },
+  description: async args => {
+    const keyword = args[0]
+    const description = args[1]
+
+    if (!await Saying.exists(keyword)) {
+      return `語録「${keyword}」は登録されていません`
+    }
+    await Saying.create(keyword, description)
+    return `語録「${keyword}」に説明文を登録しました
+"${description}"`
   },
   'delete|del': async args => {
     const keyword = args[0]
+    if (!await Saying.exists(keyword)) {
+      return `「${keyword}」という語録は存在しません`
+    }
     await Saying.delete(keyword)
     return `語録「${keyword}」を削除しました`
   },
@@ -66,6 +88,17 @@ const subCommands: { [key: string]: botCommand } = {
       count++
     }
     return `「${keyword}」の登録ワード(${count})\n\n${wordlist}`
+  },
+  'keywords': async args => {
+    const keyword = args[0]
+    const kws = await Saying.keywords()
+    let wordlist = ''
+    let count = 0
+    for (const keyword of kws.Items) {
+      wordlist += keyword.keyword.S + ': ' + keyword.description + '\n'
+      count++
+    }
+    return `語録一覧\n\n${wordlist}`
   }
 }
 
@@ -79,14 +112,14 @@ for (const subcommand in subCommands) {
     await say(msg)
   })
 }
-app.message(/^\?\+(?<keyword>.*) (?<word>.*)/, async ({ context, say }) => {
+app.message(/^\?\+(?<keyword>[^ ]+) (?<word>.*)/, async ({ context, say }) => {
   const keyword = context.matches[1]
   const word = context.matches[2]
   await Saying.add(keyword, word)
   await say(`${keyword}語録に「${word}」を登録しました。`)
 })
 
-app.message(/^\?-(?<keyword>.*) (?<word>.*)/, async ({ context, say }) => {
+app.message(/^\?-(?<keyword>[^ ]+) (?<word>.*)/, async ({ context, say }) => {
   const keyword = context.matches[1]
   const word = context.matches[2]
   await Saying.remove(keyword, word)
