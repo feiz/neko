@@ -22,10 +22,13 @@ const subCommands: { [key: string]: botCommand } = {
     const keyword = args[0]
     const wds = await Saying.list(keyword)
     let wordlist = ''
+    let count = 0
+    if (!wds.Items) { return `「${keyword}」には何も登録されていません`}
     for (const word of wds.Items) {
       wordlist += word.word.S + '\n'
+      count++
     }
-    return wordlist + 'など'
+    return `「${keyword}」の登録ワード(${count})\n\n${wordlist}`
   }
 }
 
