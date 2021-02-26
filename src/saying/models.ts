@@ -1,30 +1,5 @@
 import { dynamoDB } from "../lib/db"
 
-(async () => {
-    try {
-        await dynamoDB.createTable({
-            TableName: "Saying",
-            ProvisionedThroughput: { ReadCapacityUnits: 1, WriteCapacityUnits: 1 },
-            AttributeDefinitions: [{ AttributeName: "keyword", AttributeType: "S" }],
-            KeySchema: [{ AttributeName: "keyword", KeyType: "HASH" }]
-        });
-        await dynamoDB.createTable({
-            TableName: "Words",
-            ProvisionedThroughput: { ReadCapacityUnits: 1, WriteCapacityUnits: 1 },
-            AttributeDefinitions: [
-                { AttributeName: "keyword", AttributeType: "S" },
-                { AttributeName: "word", AttributeType: "S" }
-            ],
-            KeySchema: [
-                { AttributeName: "keyword", KeyType: "HASH" },
-                { AttributeName: "word", KeyType: "RANGE" }
-            ]
-        });
-    } catch (e) {
-        //console.log(e);
-    }
-})();
-
 class Saying {
     static async create(keyword: string) {
         try {
@@ -36,7 +11,7 @@ class Saying {
     static async delete(keyword: string) {
         try {
             for (let word of await (await Saying.list(keyword)).Items) {
-                await dynamoDB.deleteItem({ TableName: "Words", Key: { "keyword": { S: keyword }, "word": { S: word.word.S } } })
+                await dynamoDB.deleteItem({ TableName: "Word", Key: { "keyword": { S: keyword }, "word": { S: word.word.S } } })
             }
             await dynamoDB.deleteItem({ TableName: "Saying", Key: { "keyword": { S: keyword } } })
         } catch (e) {
@@ -47,7 +22,7 @@ class Saying {
     static async list(keyword: string) {
         try {
             return dynamoDB.query({
-                TableName: "Words",
+                TableName: "Word",
                 ExpressionAttributeValues: {
                     ":keyword": { S: keyword }
                 },
@@ -74,7 +49,7 @@ class Saying {
         try {
             if (await Saying.exists(keyword)) {
                 await dynamoDB.putItem({
-                    TableName: "Words",
+                    TableName: "Word",
                     Item: { keyword: { S: keyword }, word: { S: word } }
                 });
             }
@@ -87,7 +62,7 @@ class Saying {
         try {
             if (await Saying.exists(keyword)) {
                 await dynamoDB.deleteItem({
-                    TableName: "Words",
+                    TableName: "Word",
                     Key: { keyword: { S: keyword }, word: { S: word } }
                 });
             }
@@ -100,7 +75,7 @@ class Saying {
         try {
             if (await Saying.exists(keyword)) {
                 await dynamoDB.putItem({
-                    TableName: "Words",
+                    TableName: "Word",
                     Item: { keyword: { S: keyword } }
                 });
             }
