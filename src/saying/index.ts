@@ -36,33 +36,33 @@ for (const subcommand in subCommands) {
   app.message(ptn, async ({ context, say }) => {
     const args = context.matches[2].trim().split(' ')
     const msg = await commandFunc(args)
-    say(msg)
+    await say(msg)
   })
 }
 app.message(/^\?\+(?<keyword>.*) (?<word>.*)/, async ({ context, say }) => {
   const keyword = context.matches[1]
   const word = context.matches[2]
   await Saying.add(keyword, word)
-  say(`${keyword}語録に「${word}」を登録しました。`)
+  await say(`${keyword}語録に「${word}」を登録しました。`)
 })
 app.message(/^\?-(?<keyword>.*) (?<word>.*)/, async ({ context, say }) => {
   const keyword = context.matches[1]
   const word = context.matches[2]
   await Saying.remove(keyword, word)
-  say(`${keyword}語録から「${word}」を削除しました。`)
+  await say(`${keyword}語録から「${word}」を削除しました。`)
 })
-app.message(/^\?^(?<keyword>.*)/, async ({ context, say }) => {
-  const keyword = context.matches[1]
-  await Saying.pop(keyword, 'feiz')
-})
+//app.message(/^\?^(?<keyword>.*)/, async ({ context, say }) => {
+//  const keyword = context.matches[1]
+//  await Saying.pop(keyword, 'feiz')
+//})
 
 app.message(/^!(.*)/, async ({ context, say }) => {
   const source = context.matches[1].trim()
 
   try {
     const result = await evaluate(source, 0)
-    say(result)
+    await say(result)
   } catch (e) {
-    say(`${e}`)
+    await say(`${e}`)
   }
 })
