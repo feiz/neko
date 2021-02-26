@@ -15,3 +15,14 @@ test("tokeinze", () => {
     { type: TokenType.EOF, literal: null }
   ]);
 });
+
+test("スペースの混じったSTRING", () => {
+  expect([...new Lexer(` "あ い"{うえ}" "`).tokenize()]).toEqual([
+    { type: TokenType.STRING, literal: `"あ い"` },
+    { type: TokenType.LBRACE, literal: "{" },
+    { type: TokenType.IDENT, literal: "うえ" },
+    { type: TokenType.RBRACE, literal: "}" },
+    { type: TokenType.STRING, literal: `" "` },
+    { type: TokenType.EOF, literal: null }
+  ]);
+});
