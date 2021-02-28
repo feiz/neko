@@ -91,7 +91,6 @@ const subCommands: { [key: string]: botCommand } = {
     return `「${keyword}」の登録ワード(${count})\n\n${wordlist}`
   },
   keywords: async args => {
-    const keyword = args[0]
     const kws = await Saying.keywords()
     let wordlist = ''
     let count = 0
@@ -99,7 +98,7 @@ const subCommands: { [key: string]: botCommand } = {
       wordlist += keyword.keyword.S + ': ' + keyword.description + '\n'
       count++
     }
-    return `語録一覧\n\n${wordlist}`
+    return `語録一覧(${count}\n\n${wordlist}`
   }
 }
 
