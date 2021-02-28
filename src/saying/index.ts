@@ -1,6 +1,7 @@
 import { app } from '../app'
 import { Saying } from './models'
 import { evaluate } from './evaluator'
+import { App } from '@slack/bolt'
 
 const command: string = 'saying'
 const helptext = `語録コマンド \`saying\`
@@ -47,10 +48,10 @@ interface botCommand {
 const subCommands: { [key: string]: botCommand } = {
   create: async args => {
     const keyword = args[0]
-    const description = args.length == 2 ? args[1] : ""
+    const description = args.length == 2 ? args[1] : ''
 
     if (/^\w$/.test(keyword)) {
-      return "半角1文字の語録は登録できません"
+      return '半角1文字の語録は登録できません'
     }
     if (await Saying.exists(keyword)) {
       return `語録「${keyword}」はすでに登録済みです`
@@ -82,14 +83,14 @@ const subCommands: { [key: string]: botCommand } = {
     const wds = await Saying.list(keyword)
     let wordlist = ''
     let count = 0
-    if (!wds.Items) { return `「${keyword}」には何も登録されていません`}
+    if (!wds.Items) { return `「${keyword}」には何も登録されていません` }
     for (const word of wds.Items) {
       wordlist += word.word.S + '\n'
       count++
     }
     return `「${keyword}」の登録ワード(${count})\n\n${wordlist}`
   },
-  'keywords': async args => {
+  keywords: async args => {
     const keyword = args[0]
     const kws = await Saying.keywords()
     let wordlist = ''
@@ -102,45 +103,47 @@ const subCommands: { [key: string]: botCommand } = {
   }
 }
 
-for (const subcommand in subCommands) {
-  const ptn = new RegExp(String.raw`^\?${command} (${subcommand})(?<args> .*)`)
-  const commandFunc = subCommands[subcommand]
+export default (app: App): void => {
+  for (const subcommand in subCommands) {
+    const ptn = new RegExp(String.raw`^\?${command} (${subcommand})(?<args> .*)`)
+    const commandFunc = subCommands[subcommand]
 
-  app.message(ptn, async ({ context, say }) => {
-    const args = context.matches[2].trim().split(' ')
-    const msg = await commandFunc(args)
-    await say(msg)
+    app.message(ptn, async ({ context, say }) => {
+      const args = context.matches[2].trim().split(' ')
+      const msg = await commandFunc(args)
+      await say(msg)
+    })
+  }
+  app.message(/^\?\+(?<keyword>[^ ]+) (?<word>.*)/, async ({ context, say }) => {
+    const keyword = context.matches[1]
+    const word = context.matches[2]
+    await Saying.add(keyword, word)
+    await say(`${keyword}語録に「${word}」を登録しました。`)
+  })
+
+  app.message(/^\?-(?<keyword>[^ ]+) (?<word>.*)/, async ({ context, say }) => {
+    const keyword = context.matches[1]
+    const word = context.matches[2]
+    await Saying.remove(keyword, word)
+    await say(`${keyword}語録から「${word}」を削除しました。`)
+  })
+  // app.message(/^\?^(?<keyword>.*)/, async ({ context, say }) => {
+  //  const keyword = context.matches[1]
+  //  await Saying.pop(keyword, 'feiz')
+  // })
+
+  app.message(/^!(.*)/, async ({ context, say }) => {
+    const source = context.matches[1].trim()
+
+    try {
+      const result = await evaluate(source, 0)
+      await say(result)
+    } catch (e) {
+      await say(`${e}`)
+    }
+  })
+
+  app.message(/^\?saying help$/, async ({ context, say }) => {
+    await say(helptext)
   })
 }
-app.message(/^\?\+(?<keyword>[^ ]+) (?<word>.*)/, async ({ context, say }) => {
-  const keyword = context.matches[1]
-  const word = context.matches[2]
-  await Saying.add(keyword, word)
-  await say(`${keyword}語録に「${word}」を登録しました。`)
-})
-
-app.message(/^\?-(?<keyword>[^ ]+) (?<word>.*)/, async ({ context, say }) => {
-  const keyword = context.matches[1]
-  const word = context.matches[2]
-  await Saying.remove(keyword, word)
-  await say(`${keyword}語録から「${word}」を削除しました。`)
-})
-//app.message(/^\?^(?<keyword>.*)/, async ({ context, say }) => {
-//  const keyword = context.matches[1]
-//  await Saying.pop(keyword, 'feiz')
-//})
-
-app.message(/^!(.*)/, async ({ context, say }) => {
-  const source = context.matches[1].trim()
-
-  try {
-    const result = await evaluate(source, 0)
-    await say(result)
-  } catch (e) {
-    await say(`${e}`)
-  }
-})
-
-app.message(/^\?saying help$/, async ({context, say}) => {
-  await say(helptext)
-})

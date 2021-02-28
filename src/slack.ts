@@ -1,8 +1,12 @@
 import './echo'
 import './saying'
-export { handler } from './app'
+import {app, setUp} from './app'
 
-// echo(app)
+const serverlessExpress = require('@vendia/serverless-express')
+
+setUp(app)
+
+export const handler = serverlessExpress({ app: app })
 
 export default {
   handler: 'src/slack.handler',

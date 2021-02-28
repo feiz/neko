@@ -1,13 +1,18 @@
 import { App, ExpressReceiver } from '@slack/bolt'
-const serverlessExpress = require('@vendia/serverless-express')
+import echo from './echo'
+import saying from './saying'
 
 const expressReceiver = new ExpressReceiver({
   signingSecret: process.env.SLACK_SIGNING_SECRET,
   processBeforeResponse: true
 })
+
 export const app = new App({
   token: process.env.SLACK_BOT_TOKEN,
   receiver: expressReceiver
 })
 
-export const handler = serverlessExpress({ app: expressReceiver.app })
+export const setUp = (app: App): void => {
+  echo(app)
+  saying(app)
+}
