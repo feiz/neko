@@ -1,8 +1,8 @@
 module.exports = {
   env: {
+    browser: false,
     node: true,
-    es2017: true,
-    jest: true
+    es2021: true
   },
   extends: [
     'standard'
