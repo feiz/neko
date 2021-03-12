@@ -2,7 +2,7 @@ import { App, ExpressReceiver } from '@slack/bolt'
 import echo from './echo'
 import saying from './saying'
 
-const expressReceiver = new ExpressReceiver({
+export const expressReceiver = new ExpressReceiver({
   signingSecret: process.env.SLACK_SIGNING_SECRET,
   processBeforeResponse: true
 })
