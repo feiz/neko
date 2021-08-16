@@ -6,12 +6,13 @@ import { App } from '@slack/bolt'
 const command: string = 'saying'
 const helptext = `語録コマンド \`saying\`
 
-登録した語録を組み合わせて文章を生成できるコマンドです。語録を育ててたのしくあそぼう
+登録した語録を組み合わせて文章を生成できるコマンドです。
 
 *語録操作*
 *登録*: \`?saying create 語録名\`
 *削除*: \`?saying delete|del 語録名\`
 *一覧*: \`?saying list|ls 語録名\`
+*語録の一覧*: \`?saying keywords\`
 
 *語録追加・削除*
 *語録への追加*: \`?+語録名 ワード\`
@@ -25,10 +26,8 @@ const helptext = `語録コマンド \`saying\`
 
 *組み合わせ例*
 
-*入力*: \`!{誰}"は"{何}"を{どのように}"した"\`
-*出力*: \`ぼくは神をバラバラにした\`
-*入力*: \`!{５}" "{７}" "{５}\`
-*出力*: \`五月雨を あつめて速し 雛見沢\`
+\`!{誰}"は"{何}"を{どのように}"した"\`
+\`!{５}" "{７}" "{５}\`
 
 * 語録が登録されていない、もしくは登録ワードが0件の語録を表示した場合、プレーンテキストの扱いになります
 
@@ -45,10 +44,10 @@ interface botCommand {
   (args: string[]): Promise<string>;
 }
 
-const subCommands: { [key: string]: botCommand } = {
+export const subCommands: { [key: string]: botCommand } = {
   create: async args => {
     const keyword = args[0]
-    const description = args.length == 2 ? args[1] : ''
+    const description = args.length === 2 ? args[1] : ''
 
     if (/^\w$/.test(keyword)) {
       return '半角1文字の語録は登録できません'
@@ -90,7 +89,7 @@ const subCommands: { [key: string]: botCommand } = {
     }
     return `「${keyword}」の登録ワード(${count})\n\n${wordlist}`
   },
-  keywords: async args => {
+  words: async args => {
     const kws = await Saying.keywords()
     let wordlist = ''
     let count = 0
@@ -113,25 +112,21 @@ export default (app: App): void => {
       await say(msg)
     })
   }
-  app.message(/^\?\+(?<keyword>[^ ]+) (?<word>.*)/, async ({ context, say }) => {
-    const keyword = context.matches[1]
-    const word = context.matches[2]
+  app.message(/^\?\+(?<keyword>[^ ]+) (?<word>.*)/s, async ({ context, say }) => {
+    const keyword = context.matches.groups.keyword
+    const word = context.matches.groups.word
     await Saying.add(keyword, word)
-    await say(`${keyword}語録に「${word}」を登録しました。`)
+    await say(`${keyword}語録に「${word}」を登録しました`)
   })
 
-  app.message(/^\?-(?<keyword>[^ ]+) (?<word>.*)/, async ({ context, say }) => {
-    const keyword = context.matches[1]
-    const word = context.matches[2]
+  app.message(/^\?-(?<keyword>[^ ]+) (?<word>[.\n]*)/s, async ({ context, say }) => {
+    const keyword = context.matches.groups.keyword
+    const word = context.matches.groups.word
     await Saying.remove(keyword, word)
-    await say(`${keyword}語録から「${word}」を削除しました。`)
+    await say(`${keyword}語録から「${word}」を削除しました`)
   })
-  // app.message(/^\?^(?<keyword>.*)/, async ({ context, say }) => {
-  //  const keyword = context.matches[1]
-  //  await Saying.pop(keyword, 'feiz')
-  // })
 
-  app.message(/^!(.*)/, async ({ context, say }) => {
+  app.message(/^!(.*)/s, async ({ context, say }) => {
     const source = context.matches[1].trim()
 
     try {
