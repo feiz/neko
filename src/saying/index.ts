@@ -112,14 +112,14 @@ export default (app: App): void => {
       await say(msg)
     })
   }
-  app.message(/^\?\+(?<keyword>[^ ]+) (?<word>.*)/s, async ({ context, say }) => {
+  app.message(/^\?\+(?<keyword>[^ \n]+) (?<word>.*)/s, async ({ context, say }) => {
     const keyword = context.matches.groups.keyword
     const word = context.matches.groups.word
     await Saying.add(keyword, word)
     await say(`${keyword}語録に「${word}」を登録しました`)
   })
 
-  app.message(/^\?-(?<keyword>[^ ]+) (?<word>[.\n]*)/s, async ({ context, say }) => {
+  app.message(/^\?-(?<keyword>[^ \n]+) (?<word>.*)/s, async ({ context, say }) => {
     const keyword = context.matches.groups.keyword
     const word = context.matches.groups.word
     await Saying.remove(keyword, word)
