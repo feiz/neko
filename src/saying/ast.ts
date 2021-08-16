@@ -78,4 +78,6 @@ class SayingNode extends Expression {
   }
 }
 
-export { Root, Node, SayingNode, StringLiteral }
+class NakedSayingNode extends SayingNode {}
+
+export { Root, Node, SayingNode, NakedSayingNode, StringLiteral }

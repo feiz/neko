@@ -1,5 +1,5 @@
 import { Lexer, Token, TokenType } from './lexer'
-import { Root, Node, SayingNode, StringLiteral } from './ast'
+import { Root, Node, SayingNode, NakedSayingNode, StringLiteral } from './ast'
 import { ParseError } from './errors'
 
 class Parser {
@@ -22,7 +22,7 @@ class Parser {
   parse (): Root {
     const root = new Root()
 
-    while (this.currentToken.type != TokenType.EOF) {
+    while (this.currentToken.type !== TokenType.EOF) {
       root.nodes.push(this.parseExpression())
     }
     return root
@@ -50,8 +50,8 @@ class Parser {
   parseBraceExpression (): Node {
     this.next()
     if (
-      this.currentToken.type == TokenType.IDENT &&
-      this.nextToken.type == TokenType.RBRACE
+      this.currentToken.type === TokenType.IDENT &&
+      this.nextToken.type === TokenType.RBRACE
     ) {
       const node = new SayingNode()
       node.join(this.currentToken)
@@ -65,7 +65,7 @@ class Parser {
 
   /** IDENTが単体でおいてあるSaying */
   parseNakedSaying (): Node {
-    const node = new SayingNode()
+    const node = new NakedSayingNode()
     node.join(this.currentToken)
     this.next()
     return node

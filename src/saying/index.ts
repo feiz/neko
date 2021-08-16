@@ -1,7 +1,7 @@
-import { app } from '../app'
 import { Saying } from './models'
 import { evaluate } from './evaluator'
 import { App } from '@slack/bolt'
+import { normalize } from './utils'
 
 const command: string = 'saying'
 const helptext = `語録コマンド \`saying\`
@@ -114,14 +114,14 @@ export default (app: App): void => {
   }
   app.message(/^\?\+(?<keyword>[^ \n]+) (?<word>.*)/s, async ({ context, say }) => {
     const keyword = context.matches.groups.keyword
-    const word = context.matches.groups.word
+    const word = normalize(context.matches.groups.word)
     await Saying.add(keyword, word)
     await say(`${keyword}語録に「${word}」を登録しました`)
   })
 
   app.message(/^\?-(?<keyword>[^ \n]+) (?<word>.*)/s, async ({ context, say }) => {
     const keyword = context.matches.groups.keyword
-    const word = context.matches.groups.word
+    const word = normalize(context.matches.groups.word)
     await Saying.remove(keyword, word)
     await say(`${keyword}語録から「${word}」を削除しました`)
   })
