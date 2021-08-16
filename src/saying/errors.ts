@@ -1,4 +1,3 @@
 class ParseError extends Error { }
 
-
-export { ParseError };
+export { ParseError }
