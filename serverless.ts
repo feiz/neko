@@ -1,6 +1,7 @@
 import { AWS } from '@serverless/typescript'
 
 import slack from 'src/slack'
+import tables from './schema.js'
 
 const serverlessConfiguration: AWS = {
   service: 'neko',
@@ -52,28 +53,12 @@ const serverlessConfiguration: AWS = {
   resources: {
     Resources: {
       saying: {
-        Type: "AWS::DynamoDB::Table",
-        Properties: {
-          TableName: "Saying",
-          BillingMode: 'PAY_PER_REQUEST',
-          AttributeDefinitions: [{ AttributeName: "keyword", AttributeType: "S" }],
-          KeySchema: [{ AttributeName: "keyword", KeyType: "HASH" }]
-        }
+        Type: 'AWS::DynamoDB::Table',
+        Properties: tables.saying
       },
       word: {
-        Type: "AWS::DynamoDB::Table",
-        Properties: {
-          TableName: "Word",
-          BillingMode: 'PAY_PER_REQUEST',
-          AttributeDefinitions: [
-              { AttributeName: "keyword", AttributeType: "S" },
-              { AttributeName: "word", AttributeType: "S" }
-          ],
-          KeySchema: [
-              { AttributeName: "keyword", KeyType: "HASH" },
-              { AttributeName: "word", KeyType: "RANGE" }
-          ]
-        }
+        Type: 'AWS::DynamoDB::Table',
+        Properties: tables.word
       }
 
     }
