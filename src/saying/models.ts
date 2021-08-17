@@ -39,7 +39,7 @@ class Saying {
 
   static async keywords () {
     try {
-      return dynamoDB.query({
+      return dynamoDB.scan({
         TableName: 'Saying'
       })
     } catch (e) {

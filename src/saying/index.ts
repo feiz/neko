@@ -98,16 +98,6 @@ export const subCommands: { [key: string]: botCommand } = {
       count++
     }
     return `「${keyword}」の登録ワード(${count})\n\n${wordlist}`
-  },
-  words: async args => {
-    const kws = await Saying.keywords()
-    let wordlist = ''
-    let count = 0
-    for (const keyword of kws.Items) {
-      wordlist += keyword.keyword.S + ': ' + keyword.description + '\n'
-      count++
-    }
-    return `語録一覧(${count}\n\n${wordlist}`
   }
 }
 
@@ -145,6 +135,19 @@ export default (app: App): void => {
     } catch (e) {
       await say(`${e}`)
     }
+  })
+
+  app.message(/^\?saying keywords$/, async ({ context, say }) => {
+    const kws = await Saying.keywords()
+    let wordlist = ''
+    let count = 0
+    for (const keyword of kws.Items) {
+      wordlist += keyword.keyword.S
+      if (keyword.description.S) { wordlist += `: ${keyword.description.S}` }
+      wordlist += '\n'
+      count++
+    }
+    await say(`語録一覧(${count})\n\n${wordlist}`)
   })
 
   app.message(/^\?saying help$/, async ({ context, say }) => {
