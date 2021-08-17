@@ -9,7 +9,8 @@ const helptext = `語録コマンド \`saying\`
 登録した語録を組み合わせて文章を生成できるコマンドです。
 
 *語録操作*
-*登録*: \`?saying create 語録名\`
+*登録*: \`?saying create 語録名 [説明]\`
+*説明文登録*: \`?saying description 語録名 説明\`
 *削除*: \`?saying delete|del 語録名\`
 *一覧*: \`?saying list|ls 語録名\`
 *語録の一覧*: \`?saying keywords\`
