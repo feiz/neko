@@ -129,7 +129,6 @@ export default (app: App): void => {
 
   app.message(/^!(.*)/s, async ({ context, say }) => {
     const source = context.matches[1].trim()
-
     try {
       const result = await evaluate(source, 0)
       await say(result)
